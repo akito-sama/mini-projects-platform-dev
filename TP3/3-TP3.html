@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestion des Tâches</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f4f4f9;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+      }
+
+      #app {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        color: #4caf50;
+        font-size: 2.5em;
+        margin-bottom: 20px;
+      }
+
+      .task-count {
+        text-align: center;
+        font-size: 1.2em;
+        color: #666;
+        margin-bottom: 20px;
+      }
+
+      .filter-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .filter-button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background-color: #e0e0e0;
+        color: #333;
+        cursor: pointer;
+      }
+
+      .filter-button.active {
+        background-color: #4caf50;
+        color: white;
+      }
+
+      .task-list {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      .task-item {
+        background: #f9f9f9;
+        margin-bottom: 10px;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ombre réactivée */
+      }
+
+      .task-item.completed {
+        opacity: 0.7;
+      }
+
+      .task-item.completed strong,
+      .task-item.completed p {
+        text-decoration: line-through;
+        color: #999;
+      }
+
+      .task-item strong {
+        font-size: 1.2em;
+        color: #4caf50;
+      }
+
+      .task-item p {
+        margin: 5px 0;
+        color: #555;
+      }
+
+      .task-item button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="app"></div>
+
+    <script>
+      const { createApp, h } = Vue;
+
+      const TaskList = {
+        data() {
+          return {
+            tasks: [],
+            filter: "all",
+          };
+        },
+        created() {
+          fetch("taskList.json")
+            .then((response) => response.json())
+            .then((data) => {
+              this.tasks = data;
+            });
+        },
+        computed: {
+          filteredTasks() {
+            if (this.filter === "completed") {
+              return this.tasks.filter((task) => task.completed);
+            } else if (this.filter === "incomplete") {
+              return this.tasks.filter((task) => !task.completed);
+            } else {
+              return this.tasks;
+            }
+          },
+          totalTasks() {
+            return this.tasks.length;
+          },
+        },
+        methods: {
+          markAsCompleted(task) {
+            task.completed = true;
+          },
+          setFilter(filter) {
+            this.filter = filter;
+          },
+        },
+        render() {
+          return h("div", [
+            h("h1", "Gestion des Tâches"),
+            h(
+              "p",
+              { class: "task-count" },
+              `Total des tâches : ${this.totalTasks}`
+            ),
+            h("div", { class: "filter-buttons" }, [
+              h(
+                "button",
+                {
+                  class: ["filter-button", { active: this.filter === "all" }],
+                  onClick: () => this.setFilter("all"),
+                },
+                "Toutes"
+              ),
+              h(
+                "button",
+                {
+                  class: [
+                    "filter-button",
+                    { active: this.filter === "completed" },
+                  ],
+                  onClick: () => this.setFilter("completed"),
+                },
+                "Terminées"
+              ),
+              h(
+                "button",
+                {
+                  class: [
+                    "filter-button",
+                    { active: this.filter === "incomplete" },
+                  ],
+                  onClick: () => this.setFilter("incomplete"),
+                },
+                "À faire"
+              ),
+            ]),
+            h(
+              "ul",
+              { class: "task-list" },
+              this.filteredTasks.map((task) => {
+                return h(
+                  "li",
+                  {
+                    class: ["task-item", { completed: task.completed }],
+                  },
+                  [
+                    h("strong", task.title),
+                    h("p", task.description),
+                    task.completed
+                      ? null
+                      : h(
+                          "button",
+                          {
+                            onClick: () => this.markAsCompleted(task),
+                          },
+                          "Marquer comme terminée"
+                        ),
+                  ]
+                );
+              })
+            ),
+          ]);
+        },
+      };
+
+      const app = createApp({
+        components: {
+          TaskList,
+        },
+        render() {
+          return h(TaskList);
+        },
+      });
+
+      app.mount("#app");
+    </script>
+  </body>
+</html>

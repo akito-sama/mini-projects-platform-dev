@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Manipulation de Vue</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style></style>
+  </head>
+  <body>
+    <div id="monapp">
+      <button @click="titre = 'Cliqué!'">{{ titre }}</button>
+      <div style="display: flex; flex-direction: row; height: 3em">
+        <button @click="compteur++">++</button>
+        <p>{{ compteur }}</p>
+        <button @click="compteur--">--</button>
+      </div>
+      <div>
+        <input type="text" v-model="message" />
+        <p v-show="message.includes(' ')">
+          Congrats, you found the hidden paragraph!
+        </p>
+      </div>
+    </div>
+
+    <script>
+      const appli = {
+        data() {
+          return {
+            titre: "Cliquez moi!",
+            compteur: 0,
+            message: "",
+          };
+        },
+      };
+
+      Vue.createApp(appli).mount("#monapp");
+    </script>
+  </body>
+</html>
